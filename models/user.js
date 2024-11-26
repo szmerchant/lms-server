@@ -28,9 +28,15 @@ const userSchema = new Schema({
         default: ["Subscriber"],
         enum: ["Subscriber", "Instructor", "Admin"],
     },
-    stripe_account_id: "",
-    stripe_seller: {},
-    stripeSession: {},
+    stripe_account_id: {
+        type: String,
+    },
+    stripe_seller: {
+        type: Object,
+    },
+    stripeSession: {
+        type: Object,
+    },
     },
     { timestamps: true }
 );
