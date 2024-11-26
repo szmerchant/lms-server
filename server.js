@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import { readdirSync } from "fs";
 import morgan from "morgan";
 import dotenv from "dotenv";
 
@@ -14,9 +15,10 @@ app.use(express.json());
 app.use(morgan("dev"));
 
 // route
-app.get('/', (req, res) => {
-    res.send("you hit server endpoint");
-})
+readdirSync("./routes").map(async (r) => {
+    const route = await import(`./routes/${r}`);
+    app.use("/api", route.default);
+});
 
 // port
 const port = process.env.PORT || 8000;
