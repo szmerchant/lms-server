@@ -65,4 +65,27 @@ export const logout = async (req, res) => {
     } catch (err) {
         console.log(err);
     }
-}
+};
+
+export const currentUser = async (req, res) => {
+    try {
+        console.log("User from middleware:", req._id);
+        // Check if req.user is populated
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ error: "Unauthorized: User information is missing." });
+        }
+
+        // Fetch the user from the database
+        const user = await User.findById(req.user._id).select("-password").exec();
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        console.log("CURRENT_USER", user);
+        return res.json(user);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "An unexpected error occurred." });
+    }
+};

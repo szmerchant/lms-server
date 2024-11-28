@@ -6,6 +6,8 @@ import csrf from "csurf";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
+// import { handleJwtErrors } from "./middlewares/index.js";
+
 
 dotenv.config();
 
@@ -32,6 +34,7 @@ readdirSync("./routes").map(async (r) => {
 });
 // csrf
 app.use(csrfProtection);
+// app.use(handleJwtErrors);
 
 app.get("/api/csrf-token", (req, res) => {
     res.json({ csrfToken: req.csrfToken() });
