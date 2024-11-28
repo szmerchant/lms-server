@@ -38,26 +38,35 @@ export const register = async (req, res) => {
 
 export const login = async (req, res) => {
     try {
-        const {email, password} = req.body;
-        // check if our db has user with that email
+        const { email, password } = req.body;
+
+        // Check if our DB has a user with that email
         const user = await User.findOne({ email }).exec();
-        if(!user) return res.status(400).send("No user found");
-        // check password
+        if (!user) return res.status(400).send("No user found with this email.");
+
+        // Check password
         const match = await comparePassword(password, user.password);
-        // create signed jwt
+        if (!match) {
+            return res.status(400).send("Incorrect password. Please try again.");
+        }
+
+        // Create signed JWT
         const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
-        // return user and token to client, exclude hashed password
+
+        // Exclude hashed password from the response
         user.password = undefined;
-        // send token in cookie
+
+        // Send token in a cookie
         res.cookie("token", token, {
             httpOnly: true,
-            // secure: true, // only works on https (production)
+            // secure: true, // Uncomment for HTTPS in production
         });
-        // send user as json response
+
+        // Send user as JSON response
         res.json(user);
     } catch (err) {
-        console.log(err);
-        return res.status(400).send("Error. Try Again.")
+        console.error(err);
+        return res.status(500).send("An unexpected error occurred. Please try again.");
     }
 };
 
@@ -82,7 +91,7 @@ export const currentUser = async (req, res) => {
             return res.status(404).json({ error: "User not found." });
         }
 
-        return res.json(user);
+        return res.json({ ok: true });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ error: "An unexpected error occurred." });
