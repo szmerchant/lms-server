@@ -1,6 +1,9 @@
 import User from "../models/user.js";
 import { hashPassword, comparePassword } from "../utils/auth.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+
+dotenv.config(); // Load environment variables
 
 export const register = async (req, res) => {
     try {
@@ -66,3 +69,22 @@ export const logout = async (req, res) => {
         console.log(err);
     }
 }
+
+export const currentUser = async (req, res) => {
+    try {
+        console.log("User from middleware:", req.auth);
+
+        // Fetch the user from the database
+        const user = await User.findById(req.auth._id).select("-password").exec();
+        console.log("CURRENT_USER", user);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found." });
+        }
+
+        return res.json(user);
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "An unexpected error occurred." });
+    }
+};
