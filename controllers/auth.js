@@ -2,8 +2,18 @@ import User from "../models/user.js";
 import { hashPassword, comparePassword } from "../utils/auth.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import AWS from "aws-sdk";
 
 dotenv.config(); // Load environment variables
+
+const awsConfig = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_REGION,
+    apiVersion: process.env.AWS_API_VERSION
+}
+
+const SES = new AWS.SES(awsConfig);
 
 export const register = async (req, res) => {
     try {
@@ -77,7 +87,7 @@ export const logout = async (req, res) => {
     } catch (err) {
         console.log(err);
     }
-}
+};
 
 export const currentUser = async (req, res) => {
     try {
@@ -96,4 +106,40 @@ export const currentUser = async (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "An unexpected error occurred." });
     }
+};
+
+export const sendTestEmail = async (req, res) => {
+    // console.log("send email using SES");
+    // res.json({ ok: true });
+    const params = {
+        Source: process.env.EMAIL_FROM,
+        Destination: {
+            ToAddresses: ["samanzmerchant@gmail.com"]
+        },
+        ReplyToAddresses: [process.env.EMAIL_FROM],
+        Message: {
+            Body: {
+                Html: {
+                    Charset: "UTF-8",
+                    Data: `
+                        <html>
+                            <h1>Reset password link</h1>
+                            <p>Please use the following link to reset your password.<p>
+                        </html>
+                    `,
+                },
+            },
+            Subject: {
+                Charset: "UTF-8",
+                Data: "Password Reset Link"
+            }
+        }
+    }
+
+    const emailSent = SES.sendEmail(params).promise();
+
+    emailSent.then((data) => {
+        console.log(data);
+        res.json({ ok: true });
+    });
 };
