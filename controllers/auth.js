@@ -3,6 +3,7 @@ import { hashPassword, comparePassword } from "../utils/auth.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import AWS from "aws-sdk";
+import { nanoid } from "nanoid";
 
 dotenv.config(); // Load environment variables
 
@@ -114,9 +115,9 @@ export const sendTestEmail = async (req, res) => {
     const params = {
         Source: process.env.EMAIL_FROM,
         Destination: {
-            ToAddresses: ["samanzmerchant@gmail.com"]
+            ToAddresses: [ "samanzmerchant@gmail.com" ]
         },
-        ReplyToAddresses: [process.env.EMAIL_FROM],
+        ReplyToAddresses: [ process.env.EMAIL_FROM ],
         Message: {
             Body: {
                 Html: {
@@ -143,3 +144,57 @@ export const sendTestEmail = async (req, res) => {
         res.json({ ok: true });
     });
 };
+
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+        // console.log(email);
+        const shortCode = nanoid(6).toUpperCase();
+        const user = await User.findOneAndUpdate(
+            { email },
+            { passwordResetCode: shortCode}
+        );
+        if (!user) return res.status(400).send("User not found");
+
+        // prepare for email
+        const params = {
+            Source: process.env.EMAIL_FROM,
+            Destination: {
+                ToAddresses: [ email ]
+            },
+            ReplyToAddresses: [ process.env.EMAIL_FROM ],
+            Message: {
+                Body: {
+                    Html: {
+                        Charset: "UTF-8",
+                        Data: `
+                            <html>
+                                <h1>Reset password</h1>
+                                <p>Use this code to reset your password.<p>
+                                <h2 style="color:red;">${shortCode}</h2>
+                                <i>gosocialdance.com</i>
+                            </html>
+                        `,
+                    },
+                },
+                Subject: {
+                    Charset: "UTF-8",
+                    Data: "Password Reset Link"
+                }
+            }
+        };
+
+        const emailSent = SES.sendEmail(params).promise();
+
+        emailSent.then((data) => {
+            console.log(data);
+            res.json({ ok: true });
+        })
+        .catch(err => {
+            console.log(err);
+        });
+
+    } catch (err) {
+        console.log(err);
+    }
+}
