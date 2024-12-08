@@ -177,9 +177,9 @@ export const addLesson = async (req, res) => {
         }
 
         const updated = await Course.findOneAndUpdate(
-            {slug},
+            { slug },
             {
-                $push: { lessons: { title, content, video, slug:slugify(title) } },
+                $push: { lessons: { title, content, video, slug: slugify(title) } },
             },
             { new: true }
         )
