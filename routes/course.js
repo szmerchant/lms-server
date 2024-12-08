@@ -13,7 +13,8 @@ import {
     removeImage,
     create,
     read,
-    uploadVideo
+    uploadVideo,
+    removeVideo
 } from "../controllers/course.js";
 
 const router = express.Router();
@@ -25,5 +26,6 @@ router.post("/course/remove-image", requireSignin, removeImage);
 router.post("/course", requireSignin, isInstructor, create);
 router.get("/course/:slug", read);
 router.post("/course/video-upload", requireSignin, formidable(), uploadVideo);
+router.post("/course/video-remove", requireSignin, removeVideo);
 
 export default router;
