@@ -21,7 +21,8 @@ import {
     removeLesson,
     publish,
     unpublish,
-    courses
+    courses,
+    checkEnrollment
 } from "../controllers/course.js";
 
 const router = express.Router();
@@ -45,5 +46,7 @@ router.put("/course/unpublish/:courseId", requireSignin, unpublish);
 router.post("/course/lesson/:slug/:instructorId", requireSignin, addLesson);
 router.put("/course/lesson/:slug/:instructorId", requireSignin, updateLesson);
 router.put("/course/:slug/:lessonId", requireSignin, removeLesson);
+
+router.get("/check-enrollment/:courseId", requireSignin, checkEnrollment);
 
 export default router;
