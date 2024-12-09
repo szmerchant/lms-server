@@ -17,6 +17,7 @@ import {
     uploadVideo,
     removeVideo,
     addLesson,
+    updateLesson,
     removeLesson
 } from "../controllers/course.js";
 
@@ -32,6 +33,7 @@ router.get("/course/:slug", read);
 router.post("/course/video-upload/:instructorId", requireSignin, formidable(), uploadVideo);
 router.post("/course/video-remove/:instructorId", requireSignin, removeVideo);
 router.post("/course/lesson/:slug/:instructorId", requireSignin, addLesson);
+router.put("/course/lesson/:slug/:instructorId", requireSignin, updateLesson);
 router.put("/course/:slug/:lessonId", requireSignin, removeLesson);
 
 export default router;
