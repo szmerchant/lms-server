@@ -20,10 +20,13 @@ import {
     updateLesson,
     removeLesson,
     publish,
-    unpublish
+    unpublish,
+    courses
 } from "../controllers/course.js";
 
 const router = express.Router();
+
+router.get("/courses", courses);
 
 // image
 router.post("/course/upload-image", requireSignin, uploadImage);
