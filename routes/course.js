@@ -18,7 +18,9 @@ import {
     removeVideo,
     addLesson,
     updateLesson,
-    removeLesson
+    removeLesson,
+    publish,
+    unpublish
 } from "../controllers/course.js";
 
 const router = express.Router();
@@ -26,12 +28,17 @@ const router = express.Router();
 // image
 router.post("/course/upload-image", requireSignin, uploadImage);
 router.post("/course/remove-image", requireSignin, removeImage);
-// course
+
 router.post("/course", requireSignin, isInstructor, create);
 router.put("/course/:slug", requireSignin, update);
 router.get("/course/:slug", read);
 router.post("/course/video-upload/:instructorId", requireSignin, formidable(), uploadVideo);
 router.post("/course/video-remove/:instructorId", requireSignin, removeVideo);
+
+// publish/unpublish
+router.put("/course/publish/:courseId", requireSignin, publish);
+router.put("/course/unpublish/:courseId", requireSignin, unpublish);
+
 router.post("/course/lesson/:slug/:instructorId", requireSignin, addLesson);
 router.put("/course/lesson/:slug/:instructorId", requireSignin, updateLesson);
 router.put("/course/:slug/:lessonId", requireSignin, removeLesson);
