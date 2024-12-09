@@ -16,7 +16,8 @@ import {
     read,
     uploadVideo,
     removeVideo,
-    addLesson
+    addLesson,
+    removeLesson
 } from "../controllers/course.js";
 
 const router = express.Router();
@@ -31,5 +32,6 @@ router.get("/course/:slug", read);
 router.post("/course/video-upload/:instructorId", requireSignin, formidable(), uploadVideo);
 router.post("/course/video-remove/:instructorId", requireSignin, removeVideo);
 router.post("/course/lesson/:slug/:instructorId", requireSignin, addLesson);
+router.put("/course/:slug/:lessonId", requireSignin, removeLesson);
 
 export default router;
