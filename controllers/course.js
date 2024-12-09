@@ -4,7 +4,9 @@ import Course from "../models/course.js";
 import slugify from "slugify";
 import { readFileSync } from "fs";
 import User from "../models/user.js";
+import Stripe from "stripe";
 
+const stripe = new Stripe(process.env.STRIPE_SECRET);
 
 const awsConfig = {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -339,6 +341,53 @@ export const freeEnrollment = async (req, res) => {
         });
     } catch (err) {
         console.log("Free enrollment error", err);
+        return res.status(400).send("Enrollment create failed");
+    }
+};
+
+export const paidEnrollment = async (req, res) => {
+    try {
+        // check if course is free or paid
+        const course = await Course.findById(req.params.courseId)
+        .populate("instructor")
+        .exec();
+        if(!course.paid) return;
+        // application fee 30%
+        const fee = (course.price * 30) / 100;
+        // create stripe session
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ["card"], // Specify allowed payment methods
+            mode: "payment", // Add mode for one-time payment
+            // Purchase details
+            line_items: [
+                {
+                    price_data: {
+                        product_data: {
+                            name: course.name
+                        },
+                        unit_amount: Math.round(course.price.toFixed(2) * 100),
+                        currency: "usd",
+                    },
+                    quantity: 1
+                }
+            ],
+            // Charge buyer and transfer remaining balance to seller (after fee)
+            payment_intent_data: {
+                application_fee_amount: Math.round(fee.toFixed(2) * 100),
+                transfer_data: {
+                    destination: course.instructor.stripe_account_id
+                }
+            },
+            // Redirect URLs after payment
+            success_url: `${process.env.STRIPE_SUCCESS_URL}/${course._id}`,
+            cancel_url: process.env.STRIPE_CANCEL_URL
+        });
+        console.log("SESSION ID => ", session);
+
+        await User.findByIdAndUpdate(req.auth._id, { stripeSession: session }).exec();
+        res.send(session.id);
+    } catch (err) {
+        console.log("PAID ENROLLMENT ERROR", err);
         return res.status(400).send("Enrollment create failed");
     }
 };
