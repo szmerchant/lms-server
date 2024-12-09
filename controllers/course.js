@@ -319,3 +319,26 @@ export const checkEnrollment = async (req, res) => {
         course: await Course.findById(courseId).exec()
     });
 };
+
+export const freeEnrollment = async (req, res) => {
+    try {
+        const course = await Course.findById(req.params.courseId).exec();
+        if(course.paid) return;
+
+        const result = await User.findByIdAndUpdate(
+            req.auth._id,
+            {
+                $addToSet: { courses: course._id },
+            },
+            { new: true }
+        ).exec();
+        console.log(result);
+        res.json({
+            message: "Congratulations! You have successfully enrolled",
+            course
+        });
+    } catch (err) {
+        console.log("Free enrollment error", err);
+        return res.status(400).send("Enrollment create failed");
+    }
+};

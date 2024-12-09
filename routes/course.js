@@ -22,7 +22,8 @@ import {
     publish,
     unpublish,
     courses,
-    checkEnrollment
+    checkEnrollment,
+    freeEnrollment
 } from "../controllers/course.js";
 
 const router = express.Router();
@@ -48,5 +49,8 @@ router.put("/course/lesson/:slug/:instructorId", requireSignin, updateLesson);
 router.put("/course/:slug/:lessonId", requireSignin, removeLesson);
 
 router.get("/check-enrollment/:courseId", requireSignin, checkEnrollment);
+
+// enrollment
+router.post("/free-enrollment/:courseId", requireSignin, freeEnrollment);
 
 export default router;
