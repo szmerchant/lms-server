@@ -4,7 +4,8 @@ import formidable from "express-formidable";
 // middleware
 import {
     requireSignin,
-    isInstructor
+    isInstructor,
+    isEnrolled
 } from "../middlewares/index.js";
 
 // controllers
@@ -59,5 +60,6 @@ router.post("/paid-enrollment/:courseId", requireSignin, paidEnrollment);
 router.get("/stripe-success/:courseId", requireSignin, stripeSuccess);
 
 router.get("/user-courses", requireSignin, userCourses);
+router.get("/user/course/:slug", requireSignin, isEnrolled, read);
 
 export default router;
