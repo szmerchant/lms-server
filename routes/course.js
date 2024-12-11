@@ -27,7 +27,10 @@ import {
     freeEnrollment,
     paidEnrollment,
     stripeSuccess,
-    userCourses
+    userCourses,
+    markCompleted,
+    listCompleted,
+    markIncompleted
 } from "../controllers/course.js";
 
 const router = express.Router();
@@ -61,5 +64,11 @@ router.get("/stripe-success/:courseId", requireSignin, stripeSuccess);
 
 router.get("/user-courses", requireSignin, userCourses);
 router.get("/user/course/:slug", requireSignin, isEnrolled, read);
+
+// mark completed
+router.post("/mark-completed", requireSignin, markCompleted);
+router.post("/list-completed", requireSignin, listCompleted);
+router.post("/mark-incompleted", requireSignin, markIncompleted);
+
 
 export default router;
