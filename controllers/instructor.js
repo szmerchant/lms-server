@@ -93,4 +93,39 @@ export const studentCount = async (req, res) => {
     } catch (err) {
         console.log(err);
     }
-}
+};
+
+export const instructorBalance = async (req, res) => {
+    try {
+        let user = await User.findById(req.auth._id).exec();
+        const balance = await stripe.balance.retrieve({
+            stripeAccount: user.stripe_account_id
+        });
+        res.json(balance);
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+export const instructorPayoutSettings = async (req, res) => {
+    try {
+        const user = await User.findById(req.auth._id).exec();
+
+        if (!user.stripe_seller || !user.stripe_seller.id) {
+            return res.status(400).json({ error: "Stripe account not found" });
+        }
+
+        // Create a direct Stripe Dashboard link for Standard accounts
+        const dashboardLink = `https://dashboard.stripe.com/test/balance/overview`;
+        res.send(dashboardLink);
+
+        // TODO: process for express account if able to make express accounts later
+        // const loginLink = await stripe.accounts.createLoginLink(
+        //     user.stripe_seller.id,
+        //     { redirect_url: process.env.STRIPE_SETTINGS_REDIRECT }
+        // );
+        // res.json(loginLink.url);
+    } catch (err) {
+        console.log("Stripe payout settings login link err => ", err);
+    }
+};
