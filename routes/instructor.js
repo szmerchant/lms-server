@@ -8,7 +8,8 @@ import {
     makeInstructor,
     getAccountStatus,
     currentInstructor,
-    instructorCourses
+    instructorCourses,
+    studentCount
 } from "../controllers/instructor.js";
 
 const router = express.Router();
@@ -18,5 +19,7 @@ router.post("/get-account-status", requireSignin, getAccountStatus);
 router.get("/current-instructor", requireSignin, currentInstructor);
 
 router.get("/instructor-courses", requireSignin, instructorCourses);
+
+router.post("/instructor/student-count", requireSignin, studentCount);
 
 export default router;
